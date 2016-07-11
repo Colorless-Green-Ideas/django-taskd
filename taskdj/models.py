@@ -54,9 +54,9 @@ class BaseTaskdTask(models.Model):
         annotations = Annotation.objects.filter(task=self)
         return annotations
 
-    def get_taskd_json(self):
+    def export_to_json(self):
  	"""
- 	Builds a JSON in Taskwarrior format that contains the task's information.
+ 	Exports model data to JSON in Taskwarrior format.
  	"""
  	taskd_json = dict()
  	time_format = "%Y%m%dT%H%M%SZ"
