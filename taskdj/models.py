@@ -60,16 +60,16 @@ class BaseTaskdTask(models.Model):
  	"""
  	taskd_json = dict()
  	time_format = "%Y%m%dT%H%M%SZ"
- 	taskd_json['status'] = status
- 	taskd_json['uuid'] = uuid
- 	taskd_json['entry'] = start.strftime(time_format)
+ 	taskd_json['status'] = self.status
+ 	taskd_json['uuid'] = self.uuid
+ 	taskd_json['entry'] = self.entry.strftime(time_format)
  	if end:
- 		taskd_json['end'] = end.strftime(time_format)
- 	taskd_json['description'] = description
+ 		taskd_json['end'] = self.end.strftime(time_format)
+ 	taskd_json['description'] = self.description
  	taskd_json['annotations'] = self.annotations()
- 	taskd_json['project'] = project
- 	taskd_json['tags'] = [tag.name for tag in tags.all()]
- 	taskd_json['priority'] = priority
+ 	taskd_json['project'] = self.project
+ 	taskd_json['tags'] = [tag.name for tag in self.tags.all()]
+ 	taskd_json['priority'] = self.priority
  	return taskd_json        
 
 class Annotation(models.Model):
