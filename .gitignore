@@ -45,6 +45,7 @@ coverage.xml
 *.pot
 
 # Django stuff:
+migrations/
 *.log
 
 # Sphinx documentation
@@ -63,6 +64,6 @@ staticfiles/
 /celerybeat-schedule.dat
 /celerybeat-schedule.dir
 
-# vim stuff
+# Vim
 *.swp
 *.swo

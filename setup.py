@@ -1,8 +1,8 @@
 import os
 from setuptools import setup
 
-README = open('README.md').read()
-LICENSE = open('LICENSE.md').read()
+#README = open('README.md').read()
+#LICENSE = open('LICENSE.md').read()
 
 setup(
         name="django-taskd",
@@ -10,10 +10,10 @@ setup(
         url="https://github.com/asabine/django-taskd",
         author="amelia sabine",
         author_email="amelia.sabine@getpizza.cat",
-        license=LICENSE,
+        #license=LICENSE,
         py_modules=['taskdj'],
         description="""A taskd implementation for the Django web framework. Enables django applications to easily integrate
         tasks with Taskwarrior.""",
-        long_description=README,
-        install_requires=['django', 'taskc'],
+        #long_description=README,
+        requires=["django", "taskc"],
     )
