@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.test import TestCase
 
-from test_utils.models import TestTask, TestTag, TestAnnotation
+from test_utils.models import TestTask, TestAnnotation
 
-class BaseTaskdTaskTest(TestCase):
+class BaseTaskTest(TestCase):
     def setUp(self):
         self.task = TestTask.objects.create()
         self.annotation_1 = TestAnnotation.objects.create(task=self.task, description="This is the first annotation.")

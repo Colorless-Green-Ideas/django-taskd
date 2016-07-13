@@ -90,7 +90,7 @@ class BaseTag(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "taskdj"
+#        app_label = "taskdj"
 
     def __unicode__(self):
         return self.name

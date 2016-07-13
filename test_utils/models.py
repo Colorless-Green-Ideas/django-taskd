@@ -2,7 +2,9 @@ from taskdj.models import BaseTask, BaseTag, BaseAnnotation
 from django.db import models
 
 class TestTag(BaseTag):
-    pass
+
+    class Meta:
+        app_label = "test_utils"
 
 class TestAnnotation(BaseAnnotation):
     task = models.ForeignKey("TestTask", on_delete=models.CASCADE)
