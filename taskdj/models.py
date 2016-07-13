@@ -51,8 +51,9 @@ class BaseTask(models.Model):
         app_label = "taskdj"
 
     """
+    @property
     def annotations(self):
-        annotations = BaseAnnotation.objects.filter()
+        annotations = BaseAnnotation.objects.filter(task=self)
         return annotations
     """
 
@@ -65,19 +66,27 @@ class BaseTask(models.Model):
         taskd_json['status'] = self.status
         taskd_json['uuid'] = self.uuid
         taskd_json['entry'] = self.entry.strftime(time_format)
-        if end:
+        if self.end:
  	        taskd_json['end'] = self.end.strftime(time_format)
         taskd_json['description'] = self.description
+
         if getattr(self, "annotations"):
-            taskd_json['annotations'] = {key: annotation for key, annotation in self.annotations}
+            taskd_json['annotations'] = []
+            for annotation in self.annotations:
+                annotation_dict = dict()
+                annotation_dict['entry'] = annotation.entry
+                annotation_dict['description'] = annotation.description
+                taskd_json['annotations'].append(annotation_dict)
+
         taskd_json['project'] = self.project
+
         if getattr(self, "tags"):
             taskd_json['tags'] = [tag.name for tag in self.tags.all()]
+
         taskd_json['priority'] = self.priority
         return taskd_json 
 
 class BaseAnnotation(models.Model):
-    #task = models.ForeignKey("Task", related_name="%(app_label)s_%(class)s_related", on_delete=models.CASCADE)
     entry = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
     
@@ -90,7 +99,7 @@ class BaseTag(models.Model):
 
     class Meta:
         abstract = True
-#        app_label = "taskdj"
+        app_label = "taskdj"
 
     def __unicode__(self):
         return self.name
