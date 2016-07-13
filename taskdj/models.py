@@ -70,7 +70,7 @@ class BaseTask(models.Model):
  	        taskd_json['end'] = self.end.strftime(time_format)
         taskd_json['description'] = self.description
 
-        if getattr(self, "annotations"):
+        if hasattr(self, "annotations"):
             taskd_json['annotations'] = []
             for annotation in self.annotations:
                 annotation_dict = dict()
@@ -80,7 +80,7 @@ class BaseTask(models.Model):
 
         taskd_json['project'] = self.project
 
-        if getattr(self, "tags"):
+        if hasattr(self, "tags"):
             taskd_json['tags'] = [tag.name for tag in self.tags.all()]
 
         taskd_json['priority'] = self.priority

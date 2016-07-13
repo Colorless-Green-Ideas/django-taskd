@@ -3,7 +3,7 @@ from django.test import TestCase
 
 from random import randint
 
-from test_utils.models import TestTask, TestAnnotation, TestTag
+from test_utils.models import TestTask, TestAnnotation, TestTag, TestTaskNoRelations
 
 ANNOTATION_COUNT = 5
 TAG_COUNT = 5
@@ -19,9 +19,11 @@ class BaseTaskTest(TestCase):
             self.annotations.append(annotation)
 
         self.tags = []
+        self.all_tags = []
         for i in range(TAG_COUNT):
             name = "This is tag number {0}".format(i)
             tag = TestTag.objects.create(name=name)
+            self.all_tags.append(tag)
             n = randint(0, 1)
             if n == 1:
                 self.task.tags.add(tag)
@@ -41,3 +43,17 @@ class BaseTaskTest(TestCase):
         for annotation in self.task.annotations:
             test_dict = {'entry': annotation.entry, 'description': annotation.description}
             self.assertTrue(test_dict in json['annotations'])
+
+    def test_tags_in_json(self):
+        json = self.task.export_to_json()
+        for tag in self.all_tags:
+            if tag in self.tags:
+                self.assertTrue(tag.name in json['tags'])
+            else:
+                self.assertTrue(tag.name not in json['tags'])
+
+    def test_without_tags_or_annotations_in_json(self):
+        task = TestTaskNoRelations.objects.create()
+        json = task.export_to_json()
+        self.assertTrue('annotations' not in json.keys())
+        self.assertTrue('tags' not in json.keys())

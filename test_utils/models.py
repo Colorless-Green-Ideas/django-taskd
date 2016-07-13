@@ -17,3 +17,6 @@ class TestTask(BaseTask):
     def annotations(self):
         annotations = TestAnnotation.objects.filter(task=self)
         return annotations
+
+class TestTaskNoRelations(BaseTask):
+    pass
