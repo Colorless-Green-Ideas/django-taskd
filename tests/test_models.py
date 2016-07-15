@@ -29,7 +29,6 @@ class BaseTaskTest(TestCase):
                 self.task.tags.add(tag)
                 self.tags.append(tag)
 
-
     def test_task_gets_correct_annotations(self):
         for annotation in self.annotations:
             self.assertTrue(annotation in self.task.annotations)

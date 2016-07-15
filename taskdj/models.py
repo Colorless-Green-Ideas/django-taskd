@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 
-class BaseUser(models.Model):
+class BaseTaskdUser(models.Model):
     uuid = models.UUIDField(primary_key=False, unique=True)
     username = models.CharField(max_length=140)
     certificate = models.TextField(blank=True, null=True)
