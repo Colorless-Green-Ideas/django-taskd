@@ -2,20 +2,21 @@ from taskdj.models import BaseTask, BaseTag, BaseAnnotation
 from django.db import models
 
 class TestTag(BaseTag):
-
-    class Meta:
-        app_label = "test_utils"
+    pass
 
 class TestAnnotation(BaseAnnotation):
     task = models.ForeignKey("TestTask", on_delete=models.CASCADE)
 
 class TestTask(BaseTask):
+    tags = models.ManyToManyField("TestTag", blank=True)
+
     def __init__(self):
         super(TestTask, self).__init__()
 
-        tags = models.ManyToManyField(TestTag, null=True, blank=True)
-        annotations = self.annotations()
-
+    @property
     def annotations(self):
         annotations = TestAnnotation.objects.filter(task=self)
         return annotations
+
+class TestTaskNoRelations(BaseTask):
+    pass
