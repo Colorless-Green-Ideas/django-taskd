@@ -1,25 +1,27 @@
 import requests
 import taskc
 
+from taskdj.exceptions import TaskdConnectionError
+
 class TaskwarriorConnection(object):
 
     def __init__(self, taskd_user):
         self.user = taskd_user
+        self._connection = None
 
     def connect(self):
         """
         Builds a connection to taskd. Assumes a .taskrc file is present with configuration data.
         """
-        connection = taskc.simple.TaskdConnection.from_taskrc()
-        connection.username = self.user.username
-        connection.group = self.user.group
+        self._connection = taskc.simple.TaskdConnection.from_taskrc()
+        self._connection.username = self.user.username
+        self._connection.group = self.user.group
 
         if self.user.uuid == None:
             self.user.uuid = self._create_redshirt_user(connection.group)
             self.user.save()
 
-        connection.uuid = self.user.uuid
-        return connection
+        self._connection.uuid = self.user.uuid
 
     def _create_redshirt_user(self, group):
         """
@@ -41,8 +43,18 @@ class TaskwarriorConnection(object):
         keypair = response.json()
         return keypair['certificate'], keypair['key']
 
-    def import_tasks(self):
-        pass
+    def get_tasks(self):
+        if self._connection == None:
+            try:
+                self._connection = self.connect()
+            except IOError as e:
+                raise TaskdConnectionError("Could not automatically connect to taskd.") from e
 
-    def export_task(self):
+        response = self._connection.pull()
+        self.user.sync_key = response.sync_key
+        response.raise_for_status()
+        tasks = [json.loads(task) for tasks in response.data]
+        return tasks
+
+    def export_task(self, task):
         pass

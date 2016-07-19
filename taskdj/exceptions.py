@@ -7,3 +7,6 @@ class StatusError(TaskdError):
     Valid status values are: pending, deleted, completed, waiting, and recurring.
     """
     pass
+
+class TaskdConnectionError(TaskdError):
+    pass

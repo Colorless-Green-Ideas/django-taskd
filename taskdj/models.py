@@ -86,6 +86,20 @@ class BaseTask(models.Model):
         taskd_json['priority'] = self.priority
         return taskd_json 
 
+    @classmethod
+    def import_tasks_from_taskd(cls, taskd_connection):
+        tasks = taskd_connection.get_tasks()
+        for task in tasks:
+            if hasattr(task, "tags") and hasattr(cls, "tags"):  # drops tags if not represented in the model 
+                # get or create tag model
+                # establish relationship between tag & current task
+                pass
+            if hasattr(task, "annotations") and hasattr(cls, "annotations"):
+                # create annotation model with a foreignkey to current task
+                pass
+ 
+            cls.objects.create()
+
 class BaseAnnotation(models.Model):
     entry = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
