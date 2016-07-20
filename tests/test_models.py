@@ -65,7 +65,7 @@ class BaseTaskTest(TestCase):
 @mock.patch('taskdj.connect.TaskwarriorConnection', autospec=True)
 class TaskDynamicRelationshipTest(TestCase):
 
-    def setUp(self, mock_connection):
+    def setUp(self):
         # we need to generate test task data for this; possibly a test_utils function?
         self.tasklist = None
         self.tasklist_norel = None
