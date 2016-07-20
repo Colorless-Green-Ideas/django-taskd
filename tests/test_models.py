@@ -1,6 +1,11 @@
 from django.conf import settings
 from django.test import TestCase
 
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
+
 from random import randint
 
 from test_utils.models import TestTask, TestAnnotation, TestTag, TestTaskNoRelations
@@ -56,3 +61,32 @@ class BaseTaskTest(TestCase):
         json = task.export_to_json()
         self.assertTrue('annotations' not in json.keys())
         self.assertTrue('tags' not in json.keys())
+
+@mock.patch('taskdj.connect.TaskwarriorConnection', autospec=True)
+class TaskDynamicRelationshipTest(TestCase):
+
+    def setUp(self, mock_connection):
+        # we need to generate test task data for this; possibly a test_utils function?
+        self.tasklist = None
+        self.tasklist_norel = None
+
+    def test_import_with_no_relationships(self, mock_connection):
+        mock_connection.return_value.get_tasks.return_value = self.tasklist_norel
+        TestTaskNoRelations.import_tasks_from_taskd(mock_connection)
+        task_qs = TestTaskNoRelations.objects.all()
+        for task in self.tasklist:
+            self.assertTrue(task_qs.filter(uuid__exact=task['uuid']).exists())
+
+    def test_import_from_taskd_instantiates_dynamic_relationships(self, mock_connection):
+        mock_connection.return_value.get_tasks.return_value = self.tasklist
+        TestTask.import_tasks_from_taskd(mock_connection)
+        tag_qs = TestTag.objects.all()
+        annotation_qs = TestAnnotation.objects.all()
+        for task in self.tasklist:
+            if hasattr(task, "tags"):
+                for tag in task['tags']:
+                    self.assertTrue(tag_qs.filter(name__exact=tag['name']).exists())
+            if hasattr(task, "annotations"):
+                for annotation in task['annotations']:
+                    self.assertTrue(annotation_qs.filter(entry__exact=annotation['entry']).exists())
+                    self.assertTrue(annotation_qs.filter(description__exact=annotation['description']).exists())

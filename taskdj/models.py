@@ -97,7 +97,6 @@ class BaseTask(models.Model):
             if hasattr(task, "annotations") and hasattr(cls, "annotations"):
                 # create annotation model with a foreignkey to current task
                 pass
- 
             cls.objects.create()
 
 class BaseAnnotation(models.Model):

@@ -1,5 +1,6 @@
 import requests
 import taskc
+import json
 
 from taskdj.exceptions import TaskdConnectionError
 
