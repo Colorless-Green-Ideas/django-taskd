@@ -10,9 +10,6 @@ class TestAnnotation(BaseAnnotation):
 class TestTask(BaseTask):
     tags = models.ManyToManyField("TestTag", blank=True)
 
-    def __init__(self):
-        super(TestTask, self).__init__()
-
     @property
     def annotations(self):
         annotations = TestAnnotation.objects.filter(task=self)

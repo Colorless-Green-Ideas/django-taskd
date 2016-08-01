@@ -1,3 +1,5 @@
+import datetime
+import json
 import uuid
 from django.db import models
 
@@ -27,7 +29,7 @@ class BaseTask(models.Model):
         )
 
     status = models.CharField(max_length=9, blank=False, null=False, choices=statuses, default="pending")
-    uuid = models.UUIDField(blank=False, unique=True, editable=False, default=uuid.uuid4)
+    uuid = models.UUIDField(blank=False, unique=True, default=uuid.uuid4)
     entry = models.DateTimeField(auto_now_add=True, editable=False)
     description = models.TextField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
@@ -49,13 +51,6 @@ class BaseTask(models.Model):
     class Meta:
         abstract = True
         app_label = "taskdj"
-
-    """
-    @property
-    def annotations(self):
-        annotations = BaseAnnotation.objects.filter(task=self)
-        return annotations
-    """
 
     def export_to_json(self):
         """
@@ -90,14 +85,30 @@ class BaseTask(models.Model):
     def import_tasks_from_taskd(cls, taskd_connection):
         tasks = taskd_connection.get_tasks()
         for task in tasks:
-            if hasattr(task, "tags") and hasattr(cls, "tags"):  # drops tags if not represented in the model 
-                # get or create tag model
-                # establish relationship between tag & current task
-                pass
-            if hasattr(task, "annotations") and hasattr(cls, "annotations"):
+            task = json.loads(task)
+            task_model = cls.objects.create()
+            if "tags" in task.keys() and hasattr(task_model, "tags"):  # drops tags if not represented in the model 
+                for tag_name in task['tags']:
+                    # get or create tag model
+                    tag_model = task_model.tags.get_or_create(name=tag_name)[0]
+                    tag_model.save()
+                    # establish relationship between tag & current task
+                    task_model.tags.add(tag_model)
+            if "annotations" in task.keys() and hasattr(task_model, "annotations"):
                 # create annotation model with a foreignkey to current task
-                pass
-            cls.objects.create()
+                for annotation in task['annotations']:
+                    annotation_model = task_model.annotations.create(task=task_model,
+                                                                entry=annotation['entry'],
+                                                                description=annotation['description'])
+                    annotation_model.save()
+
+            for key in [key for key in task.keys() if key not in ("tags", "annotations")]:
+                if key in ("entry", "end"):
+                    setattr(task_model, key, datetime.datetime.strptime(task[key], "%Y%m%dT%H%M%SZ"))
+                else:
+                    setattr(task_model, key, task[key])
+
+            task_model.save()
 
 class BaseAnnotation(models.Model):
     entry = models.DateTimeField(auto_now_add=True)

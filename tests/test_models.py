@@ -6,9 +6,12 @@ try:
 except ImportError:
     import mock
 
+import datetime
+import json
 from random import randint
 
 from test_utils.models import TestTask, TestAnnotation, TestTag, TestTaskNoRelations
+from test_utils.generate_data import _generate_taskd_json
 
 ANNOTATION_COUNT = 5
 TAG_COUNT = 5
@@ -67,26 +70,39 @@ class TaskDynamicRelationshipTest(TestCase):
 
     def setUp(self):
         # we need to generate test task data for this; possibly a test_utils function?
-        self.tasklist = None
-        self.tasklist_norel = None
+        self.tasklist = _generate_taskd_json(True)
+        self.tasklist_norel = _generate_taskd_json(False)
 
     def test_import_with_no_relationships(self, mock_connection):
-        mock_connection.return_value.get_tasks.return_value = self.tasklist_norel
+        mock_connection.get_tasks.return_value = self.tasklist_norel
         TestTaskNoRelations.import_tasks_from_taskd(mock_connection)
         task_qs = TestTaskNoRelations.objects.all()
-        for task in self.tasklist:
+        assert task_qs
+        for task in self.tasklist_norel:
+            task = json.loads(task)
             self.assertTrue(task_qs.filter(uuid__exact=task['uuid']).exists())
 
     def test_import_from_taskd_instantiates_dynamic_relationships(self, mock_connection):
-        mock_connection.return_value.get_tasks.return_value = self.tasklist
+        mock_connection.get_tasks.return_value = self.tasklist
         TestTask.import_tasks_from_taskd(mock_connection)
+        task_qs = TestTask.objects.all()
         tag_qs = TestTag.objects.all()
         annotation_qs = TestAnnotation.objects.all()
+        assert task_qs
+        assert tag_qs
+        assert annotation_qs
         for task in self.tasklist:
+            task = json.loads(task)
+            self.assertEqual(len(task_qs.filter(uuid__exact=task['uuid'])), 1)
+            task_model = task_qs.filter(uuid__exact=task['uuid'])[0]
             if hasattr(task, "tags"):
                 for tag in task['tags']:
-                    self.assertTrue(tag_qs.filter(name__exact=tag['name']).exists())
+                    self.assertTrue(tag_qs.filter(name__exact=tag).exists())
             if hasattr(task, "annotations"):
                 for annotation in task['annotations']:
                     self.assertTrue(annotation_qs.filter(entry__exact=annotation['entry']).exists())
                     self.assertTrue(annotation_qs.filter(description__exact=annotation['description']).exists())
+            for key in [key for key in task.keys() if key not in ("tags", "annotations", "entry", "end")]:
+                self.assertEqual(str(getattr(task_model, key)), task[key])
+            self.assertEqual(task_model.entry, datetime.datetime.strptime(task['entry'], "%Y%m%dT%H%M%SZ"))
+            self.assertEqual(task_model.end, datetime.datetime.strptime(task['end'], "%Y%m%dT%H%M%SZ"))
