@@ -11,7 +11,7 @@ import json
 from random import randint
 
 from test_utils.models import TestTask, TestAnnotation, TestTag, TestTaskNoRelations
-from test_utils.generate_data import _generate_taskd_json
+from test_utils.generate_data import generate_taskd_json
 
 ANNOTATION_COUNT = 5
 TAG_COUNT = 5
@@ -70,8 +70,8 @@ class TaskDynamicRelationshipTest(TestCase):
 
     def setUp(self):
         # we need to generate test task data for this; possibly a test_utils function?
-        self.tasklist = _generate_taskd_json(True)
-        self.tasklist_norel = _generate_taskd_json(False)
+        self.tasklist = generate_taskd_json(relationships=True)
+        self.tasklist_norel = generate_taskd_json(relationships=False)
 
     def test_import_with_no_relationships(self, mock_connection):
         mock_connection.get_tasks.return_value = self.tasklist_norel
