@@ -18,7 +18,7 @@ class TaskwarriorConnection(object):
         self._connection.username = self.user.username
         self._connection.group = self.user.group
 
-        if self.user.uuid == None:
+        if self.user.uuid is None:
             self.user.uuid = self._create_redshirt_user(connection.group)
             self.user.save()
 
@@ -45,7 +45,7 @@ class TaskwarriorConnection(object):
         return keypair['certificate'], keypair['key']
 
     def get_tasks(self):
-        if self._connection == None:
+        if self._connection is None:
             try:
                 self._connection = self.connect()
             except IOError as e:
