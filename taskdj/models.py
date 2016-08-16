@@ -109,7 +109,7 @@ class BaseTask(models.Model):
             for key in static_fields:
                 if key in ("entry", "end"):
                     setattr(task_model, key, datetime.datetime.strptime(task[key], "%Y%m%dT%H%M%SZ"))
-                elif key in cls.keys():
+                elif key in task_model.keys():
                     setattr(task_model, key, task[key])
 
             task_model.save()
