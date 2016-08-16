@@ -1,18 +1,21 @@
 import datetime
 import json
 import uuid
+
 from django.db import models
+
 
 class BaseTaskdUser(models.Model):
     uuid = models.UUIDField(primary_key=False, unique=True)
     username = models.CharField(max_length=140)
-    certificate = models.TextField(blank=True, null=True)
-    key = models.TextField(blank=True, null=True)
+    certificate = models.TextField(blank=True)
+    key = models.TextField(blank=True)
     group = models.CharField(max_length=120, default="Public")
 
     class Meta:
         abstract = True
         app_label = "taskdj"
+
 
 class BaseTask(models.Model):
     statuses = (
@@ -28,25 +31,25 @@ class BaseTask(models.Model):
             ("L", "Low")
         )
 
-    status = models.CharField(max_length=9, blank=False, null=False, choices=statuses, default="pending")
+    status = models.CharField(max_length=9, blank=False, choices=statuses, default="pending")
     uuid = models.UUIDField(blank=False, unique=True, default=uuid.uuid4)
     entry = models.DateTimeField(auto_now_add=True, editable=False)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
     due = models.DateTimeField(blank=True, null=True)
     until = models.DateTimeField(blank=True, null=True)
     scheduled = models.DateTimeField(blank=True, null=True)
     wait = models.DateTimeField(blank=True, null=True)
-    recur = models.CharField(max_length=20, blank=True, null=True)
+    recur = models.CharField(max_length=20, blank=True)
     parent = models.UUIDField(blank=True, null=True)
     # annotations = when making json, get all annotations related to self & add to json['annotations']
     # e.g., json['annotations'] = Annotations.objects.filter(task=self)
-    project = models.CharField(max_length=50, blank=True, null=True)
+    project = models.CharField(max_length=50, blank=True)
     # tags = models.ManyToManyField("Tag", related_name="%(app_label)s_%(class)s_related", blank=True)
-    priority = models.CharField(max_length=1, blank=True, null=True, choices=priorities, default=None)
+    priority = models.CharField(max_length=1, blank=True, choices=priorities, default="")
     # TODO: set as a one-to-many with other tasks
-    depends = models.CharField(max_length=200, blank=True, null=True)
+    depends = models.CharField(max_length=200, blank=True)
 
     class Meta:
         abstract = True
@@ -102,13 +105,15 @@ class BaseTask(models.Model):
                                                                 description=annotation['description'])
                     annotation_model.save()
 
-            for key in [key for key in task.keys() if key not in ("tags", "annotations")]:
+            static_fields = [key for key in task.keys() if key not in ("tags", "annotations")]
+            for key in static_fields:
                 if key in ("entry", "end"):
                     setattr(task_model, key, datetime.datetime.strptime(task[key], "%Y%m%dT%H%M%SZ"))
-                else:
+                elif key in cls.keys():
                     setattr(task_model, key, task[key])
 
             task_model.save()
+
 
 class BaseAnnotation(models.Model):
     entry = models.DateTimeField(auto_now_add=True)
@@ -117,6 +122,7 @@ class BaseAnnotation(models.Model):
     class Meta:
         abstract = True
         app_label = "taskdj"
+
 
 class BaseTag(models.Model):
     name = models.CharField(max_length=140)

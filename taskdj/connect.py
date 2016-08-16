@@ -1,8 +1,8 @@
 import requests
-import taskc
+import taskc.simple
 import json
 
-from taskdj.exceptions import TaskdConnectionError
+from taskdj.exceptions import TaskdConnectionError, TaskdConfigError
 
 class TaskwarriorConnection(object):
 
@@ -10,11 +10,31 @@ class TaskwarriorConnection(object):
         self.user = taskd_user
         self._connection = None
 
-    def connect(self):
+    def connect(self, taskrc=None):
         """
-        Builds a connection to taskd. Assumes a .taskrc file is present with configuration data.
+        Builds a connection to taskd. If taskrc is specified, uses settings from the .taskrc file otherwise attempts
+        to build manually using django settings.
+        Raises TaskdConfigError if settings are not found when taskrc is empty.
+
+        Required settings:
+            TW_CLIENT_CERT: the application's client certificate.
+            TW_CLIENT_KEY:  the application's client key.
+            TW_SERVER:      the taskserver's address.
+            TW_CA_CERT:     the taskserver's CA certificate.
+
         """
-        self._connection = taskc.simple.TaskdConnection.from_taskrc()
+        if taskrc:
+            self._connection = taskc.simple.TaskdConnection.from_taskrc(taskrc=taskrc)
+        else:
+            from django.conf import settings
+            try:
+                assert settings.TW_CLIENT_CERT
+                assert settings.TW_CLIENT_KEY
+                assert settings.TW_SERVER
+                assert settings.TW_CA_CERT
+            except (AssertionError, AttributeError) as e:
+                raise TaskdConfigError(e) from e
+            self._connection = taskc.simple.TaskdConnection()
         self._connection.username = self.user.username
         self._connection.group = self.user.group
 

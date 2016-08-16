@@ -1,12 +1,8 @@
 class TaskdError(Exception):
     pass
 
-class StatusError(TaskdError):
-    """
-    Raised when a taskd status value is invalid. 
-    Valid status values are: pending, deleted, completed, waiting, and recurring.
-    """
+class TaskdConnectionError(TaskdError):
     pass
 
-class TaskdConnectionError(TaskdError):
+class TaskdConfigError(TaskdError):
     pass
