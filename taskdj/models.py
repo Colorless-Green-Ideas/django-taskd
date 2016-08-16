@@ -65,7 +65,7 @@ class BaseTask(models.Model):
         taskd_json['uuid'] = self.uuid
         taskd_json['entry'] = self.entry.strftime(time_format)
         if self.end:
- 	        taskd_json['end'] = self.end.strftime(time_format)
+            taskd_json['end'] = self.end.strftime(time_format)
         taskd_json['description'] = self.description
 
         if hasattr(self, "annotations"):
