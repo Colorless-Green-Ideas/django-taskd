@@ -33,13 +33,18 @@ class TaskwarriorConnection(object):
                 assert settings.TW_SERVER
                 assert settings.TW_CA_CERT
             except (AssertionError, AttributeError) as e:
-                raise TaskdConfigError(e) from e
+                raise TaskdConfigError(e)
             self._connection = taskc.simple.TaskdConnection()
+            self._connection.client_cert = settings.TW_CLIENT_CERT
+            self._connection.client_key = settings.TW_CLIENT_KEY
+            self._connection.server = settings.TW_SERVER
+            self._connection.port = settings.TW_PORT
+            self._connection.cacert = settings.TW_CA_CERT
         self._connection.username = self.user.username
         self._connection.group = self.user.group
 
         if self.user.uuid is None:
-            self.user.uuid = self._create_redshirt_user(connection.group)
+            self.user.uuid = self._create_redshirt_user(self._connection.group)
             self.user.save()
 
         self._connection.uuid = self.user.uuid
@@ -69,7 +74,7 @@ class TaskwarriorConnection(object):
             try:
                 self._connection = self.connect()
             except IOError as e:
-                raise TaskdConnectionError("Could not automatically connect to taskd.") from e
+                raise TaskdConnectionError(e, "Could not automatically connect to taskd.")
 
         response = self._connection.pull()
         self.user.sync_key = response.sync_key

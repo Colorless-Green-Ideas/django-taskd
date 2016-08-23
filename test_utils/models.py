@@ -1,4 +1,4 @@
-from taskdj.models import BaseTask, BaseTag, BaseAnnotation
+from taskdj.models import BaseTask, BaseTag, BaseAnnotation, BaseTaskdUser
 from django.db import models
 
 class TestTag(BaseTag):
@@ -16,4 +16,7 @@ class TestTask(BaseTask):
         return annotations
 
 class TestTaskNoRelations(BaseTask):
+    pass
+
+class TestTaskdUser(BaseTaskdUser):
     pass

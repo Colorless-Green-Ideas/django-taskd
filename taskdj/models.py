@@ -82,7 +82,7 @@ class BaseTask(models.Model):
             taskd_json['tags'] = [tag.name for tag in self.tags.all()]
 
         taskd_json['priority'] = self.priority
-        return taskd_json 
+        return taskd_json
 
     @classmethod
     def import_tasks_from_taskd(cls, taskd_connection):
@@ -118,7 +118,7 @@ class BaseTask(models.Model):
 class BaseAnnotation(models.Model):
     entry = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
-    
+
     class Meta:
         abstract = True
         app_label = "taskdj"
