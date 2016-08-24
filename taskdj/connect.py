@@ -1,6 +1,10 @@
 import requests
 import taskc.simple
 import json
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
 
 from taskdj.exceptions import TaskdConnectionError, TaskdConfigError
 
@@ -53,7 +57,7 @@ class TaskwarriorConnection(object):
         """
         Creates a user on redshirt, and returns the server-generated uuid to store in the TaskdUser model.
         """
-        url = urlparse.urlunparse(("http", "redshirt:4000", "/add_user/{0}/{1}".format(group, self.user.name), '', '', ''))
+        url = urlparse.urlunparse(("http", "redshirt:4000", "/add_user/{0}/{1}".format(group, self.user.username), '', '', ''))
         response = requests.get(url)
         response.raise_for_status()
         return response.text
