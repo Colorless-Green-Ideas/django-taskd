@@ -1,10 +1,12 @@
-# django-taskd: A taskd implementation for the Django web framework.
+# django-taskd: A taskd implementation for the Django web framework
 
-### Requirements
+Requirements
+------------
 - Django
 - A working [redshirt](https://github.com/jrabbit/taskd-redshirt) instance
 
-### Installation
+Installation
+------------
 **(soon):**
 
 1. `pip install django-taskd`
