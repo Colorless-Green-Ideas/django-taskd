@@ -10,10 +10,10 @@ Installation
 **(soon):**
 
 1. `pip install django-taskd`
-2. Add `django-taskd` to your INSTALLED\_APPS in settings.py
+2. Add `taskdj` to your INSTALLED\_APPS in settings.py
 
 **From source:**
 
 1. `git clone https://github.com/asabine/django-taskd.git`
 2. `python setup.py install`
-3. Add `django-taskd` to your INSTALLED\_APPS in settings.py
+3. Add `taskdj` to your INSTALLED\_APPS in settings.py
