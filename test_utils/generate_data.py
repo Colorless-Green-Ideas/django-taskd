@@ -9,6 +9,7 @@ DEFAULT_TEST_LISTS_MAX = 50
 DEFAULT_TEST_ANNOTATIONS = 5
 DEFAULT_TEST_TAGS = 5
 
+
 class TestData(object):
 
     def __init__(self):
@@ -55,6 +56,7 @@ class TestData(object):
 
     def timestamp(self, before=datetime.datetime.now(), after=None):
         pass
+
 
 class SampleText(object):
 

@@ -6,6 +6,9 @@ from django.db import models
 
 
 class BaseTaskdUser(models.Model):
+    """
+    Abstract base class representing a user for interacting with taskd.
+    """
     uuid = models.UUIDField(primary_key=False, unique=True)
     username = models.CharField(max_length=140)
     certificate = models.TextField(blank=True)
@@ -18,6 +21,13 @@ class BaseTaskdUser(models.Model):
 
 
 class BaseTask(models.Model):
+    """
+    Abstract base class representing a single Taskwarrior task.
+
+    In order for importing and exporting with annotations in tags to function, subclasses must supply a property for
+    annotations and a ManyToManyField for tags. Also requires a ForeignKey relationship to the task from the
+    annotation model. See test_utils/models.py for an example.
+    """
     statuses = (
             ("pending", "Pending"),
             ("deleted", "Deleted"),
@@ -85,12 +95,22 @@ class BaseTask(models.Model):
         return taskd_json
 
     @classmethod
-    def import_tasks_from_taskd(cls, taskd_connection):
-        tasks = taskd_connection.get_tasks()
+    def import_tasks_from_taskd(cls, connection):
+        """
+        Pulls tasks from the taskserver for a given user and creates model objects for each one.
+        Requires an instance of connect.TaskwarriorConnection.
+
+        Usage:
+            YourTaskModelClass.import_tasks_from_taskd()
+
+        If relationships between your subclasses of BaseTask, BaseAnnotation and BaseTag exist, it will also create
+        model objects with relationships for each tag and annotation.
+        """
+        tasks = connection.pull_tasks()
         for task in tasks:
             task = json.loads(task)
             task_model = cls.objects.create()
-            if "tags" in task.keys() and hasattr(task_model, "tags"):  # drops tags if not represented in the model 
+            if "tags" in task.keys() and hasattr(task_model, "tags"):  # drops tags if not represented in the model
                 for tag_name in task['tags']:
                     # get or create tag model
                     tag_model = task_model.tags.get_or_create(name=tag_name)[0]
@@ -116,6 +136,12 @@ class BaseTask(models.Model):
 
 
 class BaseAnnotation(models.Model):
+    """
+    Abstract base class representing a Taskwarrior annotation.
+
+    In order for importing and exporting functions to work, subclasses must supply a ForeignKey relationship
+    with the task model.
+    """
     entry = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
 
@@ -125,6 +151,9 @@ class BaseAnnotation(models.Model):
 
 
 class BaseTag(models.Model):
+    """
+    Abstract base class representing a Taskwarrior tag.
+    """
     name = models.CharField(max_length=140)
 
     class Meta:

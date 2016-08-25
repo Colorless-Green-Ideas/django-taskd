@@ -16,6 +16,7 @@ from test_utils.generate_data import TestData
 ANNOTATION_COUNT = 5
 TAG_COUNT = 5
 
+
 class BaseTaskTest(TestCase):
     def setUp(self):
         self.task = TestTask.objects.create()
@@ -65,6 +66,7 @@ class BaseTaskTest(TestCase):
         self.assertTrue('annotations' not in json.keys())
         self.assertTrue('tags' not in json.keys())
 
+
 @mock.patch('taskdj.connect.TaskwarriorConnection', autospec=True)
 class TaskDynamicRelationshipTest(TestCase):
 
@@ -75,7 +77,7 @@ class TaskDynamicRelationshipTest(TestCase):
         self.tasklist_norel = self.data.tasklist(relationships=False)
 
     def test_import_with_no_relationships(self, mock_connection):
-        mock_connection.get_tasks.return_value = self.tasklist_norel
+        mock_connection.pull_tasks.return_value = self.tasklist_norel
         TestTaskNoRelations.import_tasks_from_taskd(mock_connection)
         task_qs = TestTaskNoRelations.objects.all()
         assert task_qs
@@ -84,7 +86,7 @@ class TaskDynamicRelationshipTest(TestCase):
             self.assertTrue(task_qs.filter(uuid__exact=task['uuid']).exists())
 
     def test_import_from_taskd_instantiates_dynamic_relationships(self, mock_connection):
-        mock_connection.get_tasks.return_value = self.tasklist
+        mock_connection.pull_tasks.return_value = self.tasklist
         TestTask.import_tasks_from_taskd(mock_connection)
         task_qs = TestTask.objects.all()
         tag_qs = TestTag.objects.all()
