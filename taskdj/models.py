@@ -17,7 +17,6 @@ class BaseTaskdUser(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "taskdj"
 
 
 class BaseTask(models.Model):
@@ -63,7 +62,6 @@ class BaseTask(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "taskdj"
 
     def export_to_json(self):
         """
@@ -147,7 +145,6 @@ class BaseAnnotation(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "taskdj"
 
 
 class BaseTag(models.Model):
@@ -158,7 +155,6 @@ class BaseTag(models.Model):
 
     class Meta:
         abstract = True
-        app_label = "taskdj"
 
     def __unicode__(self):
         return self.name

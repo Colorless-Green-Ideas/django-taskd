@@ -1,3 +1,5 @@
+from django.conf import settings
+
 import requests
 import taskc.simple
 import json
@@ -31,8 +33,9 @@ class TaskwarriorConnection(object):
         """
         if taskrc:
             self._connection = taskc.simple.TaskdConnection.from_taskrc(taskrc=taskrc)
+        elif hasattr(settings, 'TASKRC'):
+            self._connection = taskc.simple.TaskdConnection.from_taskrc(taskrc=settings.TASKRC)
         else:
-            from django.conf import settings
             try:
                 assert settings.TW_CLIENT_CERT
                 assert settings.TW_CLIENT_KEY

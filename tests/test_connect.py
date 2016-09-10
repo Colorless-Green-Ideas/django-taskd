@@ -1,10 +1,12 @@
 import uuid
+import os
 
 try:
     import unittest.mock as mock
 except ImportError:
     import mock
 
+from django.conf import settings
 from django.test import TestCase, override_settings
 
 from taskdj.connect import TaskwarriorConnection
@@ -49,6 +51,14 @@ class UnitTestConnect(TestCase):
         self.assertEqual(self.connection._connection.group, self.user.group)
         self.assertEqual(self.connection._connection.uuid, test_uuid)
         self.assertEqual(self.user.uuid, test_uuid)
+
+    @mock.patch('taskc.simple.TaskdConnection.from_taskrc')
+    @override_settings(TASKRC=os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_utils/.taskrc'))
+    def test_connect_with_taskrc_in_settings(self, mock_from_taskrc):
+        self.user.uuid = uuid.uuid4()
+        new_connection = TaskwarriorConnection(self.user)
+        new_connection.connect()
+        mock_from_taskrc.assert_called_with(taskrc=settings.TASKRC)
 
     @mock.patch('taskc.simple.TaskdConnection')
     def test_pull_tasks_returns_list_of_task_dicts(self, mock_taskd_connection):
