@@ -50,7 +50,7 @@ class TaskwarriorConnection(object):
             self._connection.port = settings.TW_PORT
             self._connection.cacert = settings.TW_CA_CERT
         self._connection.username = self.user.username
-        self._connection.group = self.user.group
+        self._connection.group = settings.TW_DEFAULT_GROUP
 
         if self.user.uuid is None:
             self.user.uuid = self._create_redshirt_user(self._connection.group)
