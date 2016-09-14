@@ -50,9 +50,15 @@ class TaskwarriorConnection(object):
             self._connection.port = settings.TW_PORT
             self._connection.cacert = settings.TW_CA_CERT
         self._connection.username = self.user.username
-        self._connection.group = settings.TW_DEFAULT_GROUP
 
-        if self.user.uuid is None:
+        if hasattr(self.user, "group"):
+            self._connection.group = self.user.group
+        elif hasattr(settings, 'TW_DEFAULT_GROUP'):
+            self._connection.group = settings.TW_DEFAULT_GROUP
+        else:
+            raise TaskdConfigError("No group found. Is TW_DEFAULT_GROUP in settings.py?")
+
+        if not self.user.uuid:
             self.user.uuid = self._create_redshirt_user(self._connection.group)
             self.user.save()
 
@@ -76,7 +82,7 @@ class TaskwarriorConnection(object):
         """
         self._check_connection()
 
-        response = self._connection.push(tasklist)
+        response = self._connection.put(tasklist)
         response.raise_for_status()
 
     def _create_redshirt_user(self, group):
