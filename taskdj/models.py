@@ -67,10 +67,11 @@ class BaseTask(models.Model):
         """
         Exports model data to JSON in Taskwarrior format.
         """
+
         taskd_json = dict()
         time_format = "%Y%m%dT%H%M%SZ"
         taskd_json['status'] = self.status
-        taskd_json['uuid'] = self.uuid
+        taskd_json['uuid'] = str(self.uuid) #prep for serialization
         taskd_json['entry'] = self.entry.strftime(time_format)
         if self.end:
             taskd_json['end'] = self.end.strftime(time_format)
