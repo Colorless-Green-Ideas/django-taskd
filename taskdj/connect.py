@@ -86,7 +86,11 @@ class TaskwarriorConnection(object):
         Pushes a tasklist to the taskserver.
         """
         self._check_connection()
-        mangled_tasks = self.user.sync_key + '\n' + '\n'.join(tasklist)
+        if self.user.sync_key:
+            mangled_tasks = self.user.sync_key + '\n' + '\n'.join(tasklist)
+        else:
+            mangled_tasks = '\n'.join(tasklist)
+        
         response = self._connection.put(mangled_tasks)
         response.raise_for_status()
 
