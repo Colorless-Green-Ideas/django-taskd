@@ -1,14 +1,19 @@
-from django.conf import settings
+import json
+import logging
 
 import requests
+from django.conf import settings
+
 import taskc.simple
-import json
+from taskdj.exceptions import TaskdConfigError, TaskdConnectionError
+
 try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
 
-from taskdj.exceptions import TaskdConnectionError, TaskdConfigError
+
+logger = logging.getLogger(__name__)
 
 
 class TaskwarriorConnection(object):
@@ -89,7 +94,7 @@ class TaskwarriorConnection(object):
         """
         Creates a user on redshirt, and returns the server-generated uuid to store in the TaskdUser model.
         """
-        url = urlparse.urlunparse(("http", "redshirt:4000", "/add_user/{0}/{1}".format(group, self.user.username), '', '', ''))
+        url = urlparse.urlunparse(("http", "redshirt:4000", "/add_user/{0}/{1}".format(group, self._connection.username), '', '', ''))
         response = requests.get(url)
         response.raise_for_status()
         return response.text
@@ -100,7 +105,7 @@ class TaskwarriorConnection(object):
 
         Returns the certificate and the key.
         """
-        response = requests.get("http://redshirt:4000/create_cert/{0}".format(self.user.username))
+        response = requests.get("http://redshirt:4000/create_cert/{0}".format(self._connection.username))
         response.raise_for_status()
         keypair = response.json()
         return keypair['certificate'], keypair['key']
