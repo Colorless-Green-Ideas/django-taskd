@@ -43,7 +43,7 @@ class BaseTask(models.Model):
     status = models.CharField(max_length=9, blank=False, choices=statuses, default="pending")
     uuid = models.UUIDField(blank=False, unique=True, default=uuid.uuid4)
     entry = models.DateTimeField(auto_now_add=True, editable=False)
-    description = models.TextField(blank=True)
+    description = models.TextField(min_length=1)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
     due = models.DateTimeField(blank=True, null=True)
