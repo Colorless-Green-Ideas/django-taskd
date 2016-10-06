@@ -76,9 +76,10 @@ class TaskwarriorConnection(object):
         self._check_connection()
 
         response = self._connection.pull()
-        self.user.sync_key = response.sync_key
         response.raise_for_status()
+        self.user.sync_key = response.sync_key
         tasks = [json.loads(task) for tasks in response.data]
+        self.user.save()
         return tasks
 
     def push_tasklist(self, tasklist):
@@ -89,10 +90,14 @@ class TaskwarriorConnection(object):
         if self.user.sync_key:
             mangled_tasks = self.user.sync_key + '\n' + '\n'.join(tasklist)
         else:
+            # Should only run the first time.
             mangled_tasks = '\n'.join(tasklist)
-        logger.info("Final tasks:\n", mangled_tasks)
+        logger.info("Final tasks:\n %s", mangled_tasks)
         response = self._connection.put(mangled_tasks)
         response.raise_for_status()
+        self.user.sync_key = response.sync_key
+        self.user.save()
+
 
     def _create_redshirt_user(self, group):
         """
