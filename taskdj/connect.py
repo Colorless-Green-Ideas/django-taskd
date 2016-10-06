@@ -90,7 +90,7 @@ class TaskwarriorConnection(object):
             mangled_tasks = self.user.sync_key + '\n' + '\n'.join(tasklist)
         else:
             mangled_tasks = '\n'.join(tasklist)
-        
+        logger.info("Final tasks:\n", mangled_tasks)
         response = self._connection.put(mangled_tasks)
         response.raise_for_status()
 
