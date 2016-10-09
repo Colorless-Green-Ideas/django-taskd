@@ -81,7 +81,11 @@ class TaskwarriorConnection(object):
         """
         self._check_connection()
 
-        response = self._connection.put(tasklist)
+        # add sync key to transaction data
+        if self.user.sync_key:
+            data = self.user.sync_key + '\n' + '\n'.join(tasklist)
+
+        response = self._connection.put(data)
         response.raise_for_status()
 
     def _create_redshirt_user(self, group):
