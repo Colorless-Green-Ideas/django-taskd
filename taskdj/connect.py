@@ -87,14 +87,6 @@ class TaskwarriorConnection(object):
         Pushes a tasklist to the taskserver.
         """
         self._check_connection()
-<<<<<<< HEAD
-
-        # add sync key to transaction data
-        if self.user.sync_key:
-            data = self.user.sync_key + '\n' + '\n'.join(tasklist)
-
-        response = self._connection.put(data)
-=======
         if self.user.sync_key:
             mangled_tasks = self.user.sync_key + '\n' + '\n'.join(tasklist)
         else:
@@ -102,7 +94,7 @@ class TaskwarriorConnection(object):
             mangled_tasks = '\n'.join(tasklist)
         logger.info("Final tasks:\n %s", mangled_tasks)
         response = self._connection.put(mangled_tasks)
->>>>>>> 5dcf0aab180a9d3d8715b68517d28304bbab72e0
+
         response.raise_for_status()
         self.user.sync_key = response.sync_key
         self.user.save()
