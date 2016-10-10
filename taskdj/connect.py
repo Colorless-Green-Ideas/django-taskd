@@ -1,14 +1,19 @@
-from django.conf import settings
+import json
+import logging
 
 import requests
+from django.conf import settings
+
 import taskc.simple
-import json
+from taskdj.exceptions import TaskdConfigError, TaskdConnectionError
+
 try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
 
-from taskdj.exceptions import TaskdConnectionError, TaskdConfigError
+
+logger = logging.getLogger(__name__)
 
 
 class TaskwarriorConnection(object):
@@ -49,7 +54,8 @@ class TaskwarriorConnection(object):
             self._connection.server = settings.TW_SERVER
             self._connection.port = settings.TW_PORT
             self._connection.cacert = settings.TW_CA_CERT
-        self._connection.username = self.user.username
+            self._connection.username = self.user.username
+
         if hasattr(self.user, "group"):
             self._connection.group = self.user.group
         elif hasattr(settings, 'TW_DEFAULT_GROUP'):
@@ -70,9 +76,10 @@ class TaskwarriorConnection(object):
         self._check_connection()
 
         response = self._connection.pull()
-        self.user.sync_key = response.sync_key
         response.raise_for_status()
+        self.user.sync_key = response.sync_key
         tasks = [json.loads(task) for tasks in response.data]
+        self.user.save()
         return tasks
 
     def push_tasklist(self, tasklist):
@@ -80,19 +87,32 @@ class TaskwarriorConnection(object):
         Pushes a tasklist to the taskserver.
         """
         self._check_connection()
+<<<<<<< HEAD
 
         # add sync key to transaction data
         if self.user.sync_key:
             data = self.user.sync_key + '\n' + '\n'.join(tasklist)
 
         response = self._connection.put(data)
+=======
+        if self.user.sync_key:
+            mangled_tasks = self.user.sync_key + '\n' + '\n'.join(tasklist)
+        else:
+            # Should only run the first time.
+            mangled_tasks = '\n'.join(tasklist)
+        logger.info("Final tasks:\n %s", mangled_tasks)
+        response = self._connection.put(mangled_tasks)
+>>>>>>> 5dcf0aab180a9d3d8715b68517d28304bbab72e0
         response.raise_for_status()
+        self.user.sync_key = response.sync_key
+        self.user.save()
+
 
     def _create_redshirt_user(self, group):
         """
         Creates a user on redshirt, and returns the server-generated uuid to store in the TaskdUser model.
         """
-        url = urlparse.urlunparse(("http", "redshirt:4000", "/add_user/{0}/{1}".format(group, self.user.username), '', '', ''))
+        url = urlparse.urlunparse(("http", "redshirt:4000", "/add_user/{0}/{1}".format(group, self._connection.username), '', '', ''))
         response = requests.get(url)
         response.raise_for_status()
         return response.text
@@ -103,7 +123,7 @@ class TaskwarriorConnection(object):
 
         Returns the certificate and the key.
         """
-        response = requests.get("http://redshirt:4000/create_cert/{0}".format(self.user.username))
+        response = requests.get("http://redshirt:4000/create_cert/{0}".format(self._connection.username))
         response.raise_for_status()
         keypair = response.json()
         return keypair['certificate'], keypair['key']
