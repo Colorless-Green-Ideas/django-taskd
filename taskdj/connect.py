@@ -54,7 +54,12 @@ class TaskwarriorConnection(object):
             self._connection.server = settings.TW_SERVER
             self._connection.port = settings.TW_PORT
             self._connection.cacert = settings.TW_CA_CERT
-            self._connection.username = self.user.username
+            if self.user.username:
+                # check if username is overriden? idk how this works - jack
+                self._connection.username = self.user.username
+            else:
+                # Get the django username then
+                self._connection.username = self.user.owner.username
 
         if hasattr(self.user, "group"):
             self._connection.group = self.user.group
