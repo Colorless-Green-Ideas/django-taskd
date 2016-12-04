@@ -53,7 +53,7 @@ class TaskwarriorConnection(object):
             self._connection.client_key = settings.TW_CLIENT_KEY
             self._connection.server = settings.TW_SERVER
             self._connection.port = settings.TW_PORT
-            self._connection.cacert = settings.TW_CA_CERT
+            self._connection.cacert_file = settings.TW_CA_CERT
             if self.user.username:
                 # check if username is overriden? idk how this works - jack
                 self._connection.username = self.user.username
