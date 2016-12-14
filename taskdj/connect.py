@@ -70,6 +70,9 @@ class TaskwarriorConnection(object):
 
         if not self.user.uuid:
             self.user.uuid = self._create_redshirt_user(self._connection.group)
+            cert, key = self._create_redshirt_certs()
+            self.user.certificate = cert
+            self.user.key = key
             self.user.save()
 
         self._connection.uuid = self.user.uuid
