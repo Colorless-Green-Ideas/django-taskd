@@ -110,7 +110,8 @@ class BaseTask(models.Model):
         for task in tasks:
             if hasattr(cls, "createdby") and hasattr(cls, "inlist"):
                 # Advanced pizzacat nonsense
-                task_model = cls.objects.create(createdby=connection.user.owner, inlist=connection.user.default_list)
+                # so object.create calls save() and we can't have blank tasks.
+                task_model = cls.objects.create(createdby=connection.user.owner, inlist=connection.user.default_list, description=task['description'])
             elif hasattr(cls, "createdby"):
                 # Basic user tracking
                 task_model = cls.objects.create(createdby=connection.user.owner)
