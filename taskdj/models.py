@@ -108,12 +108,13 @@ class BaseTask(models.Model):
         """
         tasks = connection.pull_tasks()
         for task in tasks:
-            if hasattr(cls, "createdby"):
-                # Basic user tracking
-                task_model = cls.objects.create(createdby=connection.user.owner)
-            elif hasattr(cls, "createdby") and hasattr(cls, "inlist"):
+            if hasattr(cls, "createdby") and hasattr(cls, "inlist"):
                 # Advanced pizzacat nonsense
                 task_model = cls.objects.create(createdby=connection.user.owner, inlist=connection.user.default_list)
+            elif hasattr(cls, "createdby"):
+                # Basic user tracking
+                task_model = cls.objects.create(createdby=connection.user.owner)
+
             else:
                 # Vanilla model
                 task_model = cls.objects.create()
