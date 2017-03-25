@@ -108,7 +108,10 @@ class BaseTask(models.Model):
         """
         tasks = connection.pull_tasks()
         for task in tasks:
-            task_model = cls.objects.create()
+            if hasattr(cls, "createdby"):
+                task_model = cls.objects.create(createdby=connection.user.owner)
+            else:
+                task_model = cls.objects.create()
             if "tags" in task.keys() and hasattr(task_model, "tags"):  # drops tags if not represented in the model
                 for tag_name in task['tags']:
                     # get or create tag model
