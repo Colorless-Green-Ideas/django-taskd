@@ -11,7 +11,7 @@ class BaseTaskdUser(models.Model):
     Abstract base class representing a user for interacting with taskd.
     """
     uuid = models.UUIDField(primary_key=False, unique=True)
-    username = models.CharField(max_length=140)
+    username = models.CharField(max_length=140, blank=True, null=True)
     certificate = models.TextField(blank=True)
     key = models.TextField(blank=True)
     group = models.CharField(max_length=120, default="Public")
@@ -109,8 +109,13 @@ class BaseTask(models.Model):
         tasks = connection.pull_tasks()
         for task in tasks:
             if hasattr(cls, "createdby"):
+                # Basic user tracking
                 task_model = cls.objects.create(createdby=connection.user.owner)
+            elif hasattr(cls, "createdby") and hasattr(cls, "inlist"):
+                # Advanced pizzacat nonsense
+                task_model = cls.objects.create(createdby=connection.user.owner, inlist=connection.user.default_list)
             else:
+                # Vanilla model
                 task_model = cls.objects.create()
             if "tags" in task.keys() and hasattr(task_model, "tags"):  # drops tags if not represented in the model
                 for tag_name in task['tags']:
