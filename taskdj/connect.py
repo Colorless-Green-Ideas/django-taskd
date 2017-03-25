@@ -134,7 +134,7 @@ class TaskwarriorConnection(object):
         """
         if self._connection is None:
             try:
-                self._connection = self.connect()
+                self.connect()
             except IOError as e:
                 raise TaskdConnectionError(e, "Could not automatically connect to taskd.")
             except TaskdConfigError as e:
