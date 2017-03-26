@@ -87,7 +87,9 @@ class BaseTask(models.Model):
                 taskd_json['annotations'].append(annotation_dict)
 
         taskd_json['project'] = self.project
-        taskd_json['modified'] = timezone.now().strftime(time_format)
+        #taskd_json['modified'] = timezone.now().strftime(time_format)
+        taskd_json['modified'] = self.x.strftime(time_format)
+
         if hasattr(self, "tags"):
             taskd_json['tags'] = [tag.name for tag in self.tags.all()]
 
@@ -111,7 +113,7 @@ class BaseTask(models.Model):
             if hasattr(cls, "createdby") and hasattr(cls, "inlist"):
                 # Advanced pizzacat nonsense
                 # so object.create calls save() and we can't have blank tasks.
-                task_model, created = cls.objects.get_or_create(createdby=connection.user.owner, inlist=connection.user.default_list, description=task['description'], uuid=task['uuid'])
+                task_model, created = cls.objects.get_or_create(createdby=connection.user.owner, inlist=connection.inbox, description=task['description'], uuid=task['uuid'])
             elif hasattr(cls, "createdby"):
                 # Basic user tracking
                 task_model, created = cls.objects.get_or_create(createdby=connection.user.owner)
