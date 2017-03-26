@@ -87,8 +87,8 @@ class BaseTask(models.Model):
                 taskd_json['annotations'].append(annotation_dict)
 
         taskd_json['project'] = self.project
-        #taskd_json['modified'] = timezone.now().strftime(time_format)
-        taskd_json['modified'] = self.x.strftime(time_format)
+        taskd_json['modified'] = timezone.now().strftime(time_format)
+        # taskd_json['modified'] = self.x.strftime(time_format)
 
         if hasattr(self, "tags"):
             taskd_json['tags'] = [tag.name for tag in self.tags.all()]
