@@ -71,11 +71,13 @@ class UnitTestConnect(TestCase):
 
     @mock.patch('taskc.simple.TaskdConnection')
     def test_pull_tasks_returns_list_of_task_dicts(self, mock_taskd_connection):
+        self.user.uuid = uuid.uuid4()
         tasklist = self.data.tasklist()
         test_response = mock.Mock()
         test_response.sync_key = "test_sync_key"
         test_response.data = tasklist
         mock_taskd_connection.return_value.pull.return_value = test_response
+
         self.connection._connection = mock_taskd_connection
         for task in self.connection.pull_tasks():
             self.assertIn(task, tasklist)
