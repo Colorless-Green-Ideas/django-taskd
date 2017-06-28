@@ -55,7 +55,7 @@ class UnitTestConnect(TestCase):
         self.assertEqual(self.connection._connection.client_key, "test_key")
         self.assertEqual(self.connection._connection.server, "test_server")
         self.assertEqual(self.connection._connection.port, "test_port")
-        self.assertEqual(self.connection._connection.cacert, "test_ca_cert")
+        self.assertEqual(self.connection._connection.cacert_file, "test_ca_cert")
         self.assertEqual(self.connection._connection.username, self.user.username)
         self.assertEqual(self.connection._connection.group, self.user.group)
         self.assertEqual(self.connection._connection.uuid, test_uuid)
