@@ -1,10 +1,13 @@
 import datetime
 import json
 import uuid
+import logging
 
 from django.db import models
 from django.utils import timezone
 from django.core.validators import MinLengthValidator
+
+logger = logging.getLogger(__name__)
 
 class BaseTaskdUser(models.Model):
     """
@@ -121,6 +124,7 @@ class BaseTask(models.Model):
             else:
                 # Vanilla model
                 task_model = cls.objects.create()
+            logger.debug("Task type: %s", type(task))
             if "tags" in task.keys() and hasattr(task_model, "tags"):  # drops tags if not represented in the model
                 for tag_name in task['tags']:
                     # get or create tag model

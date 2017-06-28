@@ -33,7 +33,7 @@ class TestData(object):
             taskd_json['project'] = "testing"
             taskd_json['priority'] = priorities[random.randint(0, 3)]
 
-            taskd_json = json.dumps(taskd_json)
+            # taskd_json = json.dumps(taskd_json) 
             tasklist.append(taskd_json)
         return tasklist
 

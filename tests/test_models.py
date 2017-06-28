@@ -8,6 +8,7 @@ except ImportError:
 
 import datetime
 import json
+import logging
 from random import randint
 
 from test_utils.models import TestTask, TestAnnotation, TestTag, TestTaskNoRelations
@@ -16,6 +17,7 @@ from test_utils.generate_data import TestData
 ANNOTATION_COUNT = 5
 TAG_COUNT = 5
 
+logging.basicConfig(level=logging.INFO)
 
 class BaseTaskTest(TestCase):
     def setUp(self):
@@ -78,11 +80,13 @@ class TaskDynamicRelationshipTest(TestCase):
 
     def test_import_with_no_relationships(self, mock_connection):
         mock_connection.pull_tasks.return_value = self.tasklist_norel
+        # import pprint
+        # pprint.pprint(self.tasklist_norel[0])
         TestTaskNoRelations.import_tasks_from_taskd(mock_connection)
         task_qs = TestTaskNoRelations.objects.all()
         assert task_qs
         for task in self.tasklist_norel:
-            task = json.loads(task)
+            # task = json.loads(task)
             self.assertTrue(task_qs.filter(uuid__exact=task['uuid']).exists())
 
     def test_import_from_taskd_instantiates_dynamic_relationships(self, mock_connection):
@@ -95,7 +99,7 @@ class TaskDynamicRelationshipTest(TestCase):
         assert tag_qs
         assert annotation_qs
         for task in self.tasklist:
-            task = json.loads(task)
+            # task = json.loads(task)
             self.assertEqual(len(task_qs.filter(uuid__exact=task['uuid'])), 1)
             task_model = task_qs.filter(uuid__exact=task['uuid'])[0]
             if hasattr(task, "tags"):
