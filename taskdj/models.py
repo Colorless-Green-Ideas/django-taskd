@@ -116,7 +116,7 @@ class BaseTask(models.Model):
             if hasattr(cls, "createdby") and hasattr(cls, "inlist"):
                 # Advanced pizzacat nonsense
                 # so object.create calls save() and we can't have blank tasks.
-                task_model, created = cls.objects.get_or_create(createdby=connection.user.owner, inlist=connection.user.inbox, description=task['description'], uuid=task['uuid'])
+                task_model, created = cls.objects.get_or_create(uuid=task['uuid'], default={'createdby': connection.user.owner, 'inlist': connection.user.inbox, 'description': task['description']})
             elif hasattr(cls, "createdby"):
                 # Basic user tracking
                 task_model, created = cls.objects.get_or_create(createdby=connection.user.owner)
