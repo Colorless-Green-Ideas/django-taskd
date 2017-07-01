@@ -64,6 +64,8 @@ class BaseTask(models.Model):
     # TODO: set as a one-to-many with other tasks
     depends = models.CharField(max_length=200, blank=True)
 
+    modified = models.DateTimeField(auto_now=True)
+
     class Meta:
         abstract = True
 
@@ -90,8 +92,7 @@ class BaseTask(models.Model):
                 taskd_json['annotations'].append(annotation_dict)
 
         taskd_json['project'] = self.project
-        taskd_json['modified'] = timezone.now().strftime(time_format)
-        # taskd_json['modified'] = self.x.strftime(time_format)
+        taskd_json['modified'] = self.modified.strftime(time_format)
 
         if hasattr(self, "tags"):
             taskd_json['tags'] = [tag.name for tag in self.tags.all()]
