@@ -129,7 +129,10 @@ class BaseTask(models.Model):
             if "tags" in task.keys() and hasattr(task_model, "tags"):  # drops tags if not represented in the model
                 for tag_name in task['tags']:
                     # get or create tag model
-                    tag_model = task_model.tags.get_or_create(name=tag_name)[0]
+                    if hasattr(cls, "createdby"):
+                        tag_model = task_model.tags.get_or_create(name=tag_name, owner=connection.user.owner)[0]
+                    else:
+                        tag_model = task_model.tags.get_or_create(name=tag_name)[0]
                     tag_model.save()
                     # establish relationship between tag & current task
                     task_model.tags.add(tag_model)
@@ -144,7 +147,9 @@ class BaseTask(models.Model):
             static_fields = [key for key in task.keys() if key not in ("tags", "annotations")]
             for key in static_fields:
                 if key in ("entry", "end"):
-                    setattr(task_model, key, datetime.datetime.strptime(task[key], "%Y%m%dT%H%M%SZ"))
+                    date = datetime.datetime.strptime(task[key], "%Y%m%dT%H%M%SZ")
+                    logger.debug("date: %s, raw-value: %s ", date, task[key])
+                    setattr(task_model, key, date)
                 elif hasattr(task_model, key):
                     setattr(task_model, key, task[key])
 
