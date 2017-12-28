@@ -113,3 +113,19 @@ class TaskDynamicRelationshipTest(TestCase):
                 self.assertEqual(str(getattr(task_model, key)), task[key])
             self.assertEqual(task_model.entry, datetime.datetime.strptime(task['entry'], "%Y%m%dT%H%M%SZ"))
             self.assertEqual(task_model.end, datetime.datetime.strptime(task['end'], "%Y%m%dT%H%M%SZ"))
+
+
+@mock.patch('taskdj.connect.TaskwarriorConnection', autospec=True)
+class WunderlistDates(TestCase):
+    """Pizzacat issue #163"""
+
+    def setUp(self):
+        self.data = TestData()
+        self.tasklist = [{"status": "completed", "description": "Fix Pizza Kite Report", "due": "20111114T000000Z", "wunder-extid": 50606340, "uuid": "219f712b-23ce-5a7d-ac8f-0aad397d3ed9", "entry": "20121216T001452Z", "modified": "20121216T001452Z"},
+        {"status": "completed", "description": "Make some color functions with HSL", "due": "20111114T000000Z", "wunder-extid": 46268186, "uuid": "5cf43a27-5bad-5acc-b679-6a7569ec9cbd", "entry": "20121216T064410Z", "modified": "20121216T064410Z"}]
+
+    def test_wunderlist_date_no_time(self, mock_connection):
+        mock_connection.pull_tasks.return_value = self.tasklist
+        TestTask.import_tasks_from_taskd(mock_connection)
+        task_qs = TestTask.objects.all()
+        assert task_qs.exists()

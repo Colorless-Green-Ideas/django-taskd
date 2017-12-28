@@ -146,7 +146,7 @@ class BaseTask(models.Model):
 
             static_fields = [key for key in task.keys() if key not in ("tags", "annotations")]
             for key in static_fields:
-                if key in ("entry", "end"):
+                if key in ("entry", "end", "due", "scheduled", "wait"):
                     date = datetime.datetime.strptime(task[key], "%Y%m%dT%H%M%SZ")
                     logger.debug("date: %s, raw-value: %s ", date, task[key])
                     setattr(task_model, key, date)
