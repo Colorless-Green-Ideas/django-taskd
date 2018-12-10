@@ -11,7 +11,7 @@ class BaseTaskdUser(models.Model):
     Abstract base class representing a user for interacting with taskd.
     """
     uuid = models.UUIDField(primary_key=False, unique=True)
-    username = models.CharField(max_length=140)
+    username = models.CharField(max_length=140, blank=True)
     certificate = models.TextField(blank=True)
     key = models.TextField(blank=True)
     group = models.CharField(max_length=120, default="Public")

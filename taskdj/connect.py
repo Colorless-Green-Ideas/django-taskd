@@ -74,6 +74,8 @@ class TaskwarriorConnection(object):
             self.user.certificate = cert
             self.user.key = key
             self.user.save()
+        else:
+            logger.info("Not generating certs.")
 
         self._connection.uuid = self.user.uuid
 
@@ -86,7 +88,7 @@ class TaskwarriorConnection(object):
         response = self._connection.pull()
         response.raise_for_status()
         self.user.sync_key = response.sync_key
-        tasks = [json.loads(task) for tasks in response.data]
+        tasks = [json.loads(task) for task in response.data]
         self.user.save()
         return tasks
 
