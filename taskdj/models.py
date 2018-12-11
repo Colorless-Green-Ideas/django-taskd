@@ -1,17 +1,20 @@
 import datetime
 import json
 import uuid
+import logging
 
 from django.db import models
 from django.utils import timezone
 from django.core.validators import MinLengthValidator
+
+logger = logging.getLogger(__name__)
 
 class BaseTaskdUser(models.Model):
     """
     Abstract base class representing a user for interacting with taskd.
     """
     uuid = models.UUIDField(primary_key=False, unique=True)
-    username = models.CharField(max_length=140, blank=True)
+    username = models.CharField(max_length=140, blank=True, null=True)
     certificate = models.TextField(blank=True)
     key = models.TextField(blank=True)
     group = models.CharField(max_length=120, default="Public")
@@ -61,6 +64,8 @@ class BaseTask(models.Model):
     # TODO: set as a one-to-many with other tasks
     depends = models.CharField(max_length=200, blank=True)
 
+    modified = models.DateTimeField(auto_now=True)
+
     class Meta:
         abstract = True
 
@@ -87,7 +92,8 @@ class BaseTask(models.Model):
                 taskd_json['annotations'].append(annotation_dict)
 
         taskd_json['project'] = self.project
-        taskd_json['modified'] = timezone.now().strftime(time_format)
+        taskd_json['modified'] = self.modified.strftime(time_format)
+
         if hasattr(self, "tags"):
             taskd_json['tags'] = [tag.name for tag in self.tags.all()]
 
@@ -108,12 +114,25 @@ class BaseTask(models.Model):
         """
         tasks = connection.pull_tasks()
         for task in tasks:
-            task = json.loads(task)
-            task_model = cls.objects.create()
+            if hasattr(cls, "createdby") and hasattr(cls, "inlist"):
+                # Advanced pizzacat nonsense
+                # so object.create calls save() and we can't have blank tasks.
+                task_model, created = cls.objects.get_or_create(uuid=task['uuid'], defaults={'createdby': connection.user.owner, 'inlist': connection.user.inbox, 'description': task['description']})
+            elif hasattr(cls, "createdby"):
+                # Basic user tracking
+                task_model, created = cls.objects.get_or_create(createdby=connection.user.owner)
+
+            else:
+                # Vanilla model
+                task_model = cls.objects.create()
+            logger.debug("Task type: %s", type(task))
             if "tags" in task.keys() and hasattr(task_model, "tags"):  # drops tags if not represented in the model
                 for tag_name in task['tags']:
                     # get or create tag model
-                    tag_model = task_model.tags.get_or_create(name=tag_name)[0]
+                    if hasattr(cls, "createdby"):
+                        tag_model = task_model.tags.get_or_create(name=tag_name, owner=connection.user.owner)[0]
+                    else:
+                        tag_model = task_model.tags.get_or_create(name=tag_name)[0]
                     tag_model.save()
                     # establish relationship between tag & current task
                     task_model.tags.add(tag_model)
@@ -127,8 +146,10 @@ class BaseTask(models.Model):
 
             static_fields = [key for key in task.keys() if key not in ("tags", "annotations")]
             for key in static_fields:
-                if key in ("entry", "end"):
-                    setattr(task_model, key, datetime.datetime.strptime(task[key], "%Y%m%dT%H%M%SZ"))
+                if key in ("entry", "end", "due", "scheduled", "wait"):
+                    date = datetime.datetime.strptime(task[key], "%Y%m%dT%H%M%SZ")
+                    logger.debug("date: %s, raw-value: %s ", date, task[key])
+                    setattr(task_model, key, date)
                 elif hasattr(task_model, key):
                     setattr(task_model, key, task[key])
 

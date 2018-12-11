@@ -9,7 +9,7 @@ except ImportError:
 
 setup(
         name="django_taskd",
-        version="0.0.0a0",
+        version="0.0.1a1",
         url="https://github.com/asabine/django-taskd",
         author="amelia sabine",
         author_email="amelia.sabine@getpizza.cat",
@@ -19,7 +19,7 @@ setup(
         description="""A taskd implementation for the Django web framework. Enables django applications to easily integrate
         tasks with Taskwarrior.""",
         #long_description=README,
-        requires=["django", "taskc"],
+        install_requires=["django", "taskc", "requests"],
         classifiers=["Framework :: Django",
                    "Programming Language :: Python :: 2.7",
                    "Programming Language :: Python :: 3.5",
