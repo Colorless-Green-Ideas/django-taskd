@@ -1,5 +1,7 @@
 # django-taskd: A taskd implementation for the Django web framework
 
+[![Build Status](https://travis-ci.com/Colorless-Green-Ideas/django-taskd.svg?branch=master)](https://travis-ci.com/Colorless-Green-Ideas/django-taskd)
+
 Requirements
 ------------
 - Django
